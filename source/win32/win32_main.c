@@ -9,6 +9,18 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "..\vendor\stb_image\stb_image_write.h"
 
+inline i32 abs_i32(i32 value)
+{
+	return value < 0 ? -value : value;
+}
+
+inline void swap_i32(i32 *lhs, i32 *rhs)
+{
+	i32 temp = *rhs;
+	*rhs = *lhs;
+	*lhs = temp;
+}
+
 typedef struct Image
 {
 	const i32 width;
@@ -21,7 +33,7 @@ typedef struct Color
 {
 	u8 r, g, b;
 } Color;
-global Color color_white = { 255, 255, 255 };
+global Color color_white = {255, 255, 255};
 
 void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color);
 
@@ -40,6 +52,9 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 {
 	Image *image = &global_image;
 	image->pixels = (u8 *)calloc(image->width * image->height * image->channel_number, sizeof(image->pixels));
+	i32 a = 10;
+	i32 b = 20;
+	swap_i32(&a, &b);
 
 	// image_set_pixel(image, 49, 49, {255, 255, 255});
 	draw_line(image, 0, 0, 10, 40, color_white);
@@ -56,22 +71,38 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
 void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color)
 {
-	if (x0 > x1)
+	i32 dx = x1 - x0;
+	i32 dy = y1 - y0;
+	if (abs_i32(dx) > abs_i32(dy))
 	{
-		int temp_x = x0;
-		x0 = x1;
-		x1 = temp_x;
+		if (x0 > x1)
+		{
+			swap_i32(&x0, &x1);
+			swap_i32(&y0, &y1);
+		}
 
-		int temp_y = y0;
-		y0 = y1;
-		y1 = temp_y;
+		f32 a = dx / (f32) dy;
+		f32 y = (f32)y0;
+		for (i32 x = x0; x < x1; x += 1)
+		{
+			image_set_pixel(image, (i32)x, (i32)y, color);
+			y = y + a;
+		}
 	}
-
-	f32 a = (y1 - y0) / (f32)(x1 - x0);
-	f32 y = (f32)y0;
-	for (i32 x = x0; x < x1; x += 1)
+	else
 	{
-		image_set_pixel(image, (i32)x, (i32)y, color);
-		y = y + a;
+		if (y0 > y1)
+		{
+			swap_i32(&x0, &x1);
+			swap_i32(&y0, &y1);
+		}
+
+		f32 a = dx / (f32) dy;
+		f32 x = (f32)x0;
+		for (i32 y = y0; y < y1; y += 1)
+		{
+			image_set_pixel(image, (i32)x, (i32)y, color);
+			x = x + a;
+		}
 	}
 }
