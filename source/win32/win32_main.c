@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include "..\language.h"
+#include "..\math_utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "..\vendor\stb_image\stb_image.h"
@@ -8,18 +9,6 @@
 #define STBI_MSC_SECURE_CRT
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "..\vendor\stb_image\stb_image_write.h"
-
-inline i32 abs_i32(i32 value)
-{
-	return value < 0 ? -value : value;
-}
-
-inline void swap_i32(i32 *lhs, i32 *rhs)
-{
-	i32 temp = *rhs;
-	*rhs = *lhs;
-	*lhs = temp;
-}
 
 typedef struct Image
 {
@@ -34,12 +23,18 @@ typedef struct Color
 	u8 r, g, b;
 } Color;
 global Color color_white = {255, 255, 255};
+global Color color_red = {255, 0, 0};
 
 void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color);
 
 void image_set_pixel(Image *image, i32 x, i32 y, Color color)
 {
-	u32 index = (y * image->width + x) * image->channel_number;
+	if (x >= image->width || y >= image->height)
+		return;
+	i32 index = (y * image->width + x) * image->channel_number;
+
+	if (index < 0)
+		return;
 
 	image->pixels[index++] = color.r;
 	image->pixels[index++] = color.g;
@@ -56,12 +51,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 	i32 b = 20;
 	swap_i32(&a, &b);
 
-	// image_set_pixel(image, 49, 49, {255, 255, 255});
-	draw_line(image, 0, 0, 10, 40, color_white);
+	draw_line(image, 7, 5, 10, 40, color_white);
+	draw_line(image, 30, 20, 50, 0, color_red);
 
 	stbi_flip_vertically_on_write(1);
 	stbi_write_png(
-		"render.png",
+		"../render.png",
 		image->width, image->height, image->channel_number,
 		image->pixels, 0);
 
@@ -71,9 +66,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
 void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color)
 {
-	i32 dx = x1 - x0;
-	i32 dy = y1 - y0;
-	if (abs_i32(dx) > abs_i32(dy))
+	if (abs_i32(x1 - x0) > abs_i32(y1 - y0))
 	{
 		if (x0 > x1)
 		{
@@ -81,12 +74,11 @@ void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color)
 			swap_i32(&y0, &y1);
 		}
 
-		f32 a = dx / (f32) dy;
-		f32 y = (f32)y0;
+		i32 *y_values = (i32 *)malloc(sizeof(y_values) * (x1 - x0));
+		interpolate(x0, y0, x1, y1, y_values);
 		for (i32 x = x0; x < x1; x += 1)
 		{
-			image_set_pixel(image, (i32)x, (i32)y, color);
-			y = y + a;
+			image_set_pixel(image, (i32)x, y_values[x - x0], color);
 		}
 	}
 	else
@@ -97,12 +89,11 @@ void draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color)
 			swap_i32(&y0, &y1);
 		}
 
-		f32 a = dx / (f32) dy;
-		f32 x = (f32)x0;
+		i32 *x_values = (i32 *)malloc(sizeof(x_values) * (y1 - y0));
+		interpolate(y0, x0, y1, x1, x_values);
 		for (i32 y = y0; y < y1; y += 1)
 		{
-			image_set_pixel(image, (i32)x, (i32)y, color);
-			x = x + a;
+			image_set_pixel(image, x_values[y - y0], (i32)y, color);
 		}
 	}
 }
