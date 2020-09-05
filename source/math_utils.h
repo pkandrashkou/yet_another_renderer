@@ -21,7 +21,7 @@ global void interpolate(i32 i0, i32 d0, i32 i1, i32 d1, i32 *result) {
     f32 d = (f32)d0;
 
     i32 index = 0;
-    for (i32 i = i0; i < i1; i++) {
+    for (i32 i = i0; i <= i1; i++) {
         result[index] = (i32)d;
         index++;
         d = d + a;
