@@ -1,3 +1,8 @@
+#ifndef MATH_UTILS_H
+#define MATH_UTILS_H
+
+#include "language.h"
+
 inline i32 abs_i32(i32 value) {
     return value < 0 ? -value : value;
 }
@@ -49,3 +54,5 @@ global void interpolate_f32(i32 i0, f32 d0, i32 i1, f32 d1, f32 *result) {
     }
     return;
 }
+
+#endif /* MATH_UTILS_H */

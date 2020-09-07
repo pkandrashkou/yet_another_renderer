@@ -1,3 +1,6 @@
+#ifndef LANGUAGE_H
+#define LANGUAGE_H
+
 #include <stdint.h>
 
 typedef int8_t i8;
@@ -16,3 +19,5 @@ typedef double f64;
 #define global static
 #define internal static
 #define local_persist static
+
+#endif /* LANGUAGE_H */

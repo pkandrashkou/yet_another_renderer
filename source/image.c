@@ -1,5 +1,8 @@
 #include "image.h"
 
+#include "language.h"
+#include "math_utils.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "vendor\stb_image\stb_image.h"
 
@@ -18,6 +21,10 @@ void image_set_pixel(Image *image, i32 x, i32 y, Color color) {
     image->pixels[index++] = color.r;
     image->pixels[index++] = color.g;
     image->pixels[index++] = color.b;
+}
+
+void image_draw_line_point(Image *image, Point p1, Point p2, Color color) {
+    image_draw_line(image, (i32)p1.x, (i32)p1.y, (i32)p2.x, (i32)p2.y, color);
 }
 
 void image_draw_line(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, Color color) {
