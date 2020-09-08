@@ -20,4 +20,27 @@ typedef double f64;
 #define internal static
 #define local_persist static
 
+typedef union v3 {
+    struct {
+        f32 x;
+        f32 y;
+        f32 z;
+    };
+    
+    struct {
+        f32 r;
+        f32 g;
+        f32 b;
+    };
+    
+    f32 elements[3];
+} v3;
+
+internal v3
+v3_add_v3(v3 a, v3 b)
+{
+    v3 c = { a.x + b.x, a.y + b.y, a.z + b.z };
+    return c;
+}
+
 #endif /* LANGUAGE_H */

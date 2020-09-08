@@ -61,6 +61,10 @@ void image_draw_triangle_wireframe(Image *image, i32 x0, i32 y0, i32 x1, i32 y1,
     image_draw_line(image, x2, y2, x0, y0, color);
 }
 
+void image_draw_triangle_wireframe_point(Image *image, Point p1, Point p2, Point p3, Color color) {
+    image_draw_triangle_wireframe(image,(i32)p1.x, (i32)p1.y, (i32)p2.x, (i32)p2.y, (i32)p3.x, (i32)p3.y, color);
+}
+
 void image_draw_triangle_filled(Image *image, i32 x0, i32 y0, i32 x1, i32 y1, i32 x2, i32 y2, Color fill_color) {
     image_draw_triangle_filled_shaded(image, x0, y0, x1, y1, x2, y2, fill_color, 1, 1, 1);
 }
