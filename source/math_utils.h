@@ -3,6 +3,8 @@
 
 #include "language.h"
 
+#define MY_PI 3.1415926f
+
 inline i32 abs_i32(i32 value) {
     return value < 0 ? -value : value;
 }
