@@ -109,7 +109,7 @@ m4_init_diagonal(f32 diagonal) {
     return m;
 }
 
-// Post multiply. A*B, not B*A.
+// Pre multiply. Row-Major.
 internal m4
 m4_multiply_m4(m4 a, m4 b) {
     m4 c = {0};
@@ -180,6 +180,7 @@ m4_transposed(m4 m) {
     return result;
 }
 
+// Pre multiply. Row-Major.
 internal v4
 v4_multiply_m4(v4 v, m4 m) {
     v4 result = {0};
