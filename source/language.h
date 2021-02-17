@@ -46,6 +46,12 @@ v3_add_v3(v3 a, v3 b) {
     return c;
 }
 
+internal v3
+v3_multiply_scalar(v3 a, f32 b) {
+    v3 result = { a.x * b, a.y * b, a.z * b};
+    return result;
+}
+
 internal f32
 v3_length_squared(v3 v) {
     return v.x * v.x + v.y * v.y + v.z * v.z;
@@ -131,15 +137,15 @@ m4_rotate(v3 axis, f32 angle) {
     f32 cos_value = 1.0f - cos_theta;
 
     result.elements[0][0] = axis.x * axis.x * cos_value + cos_theta;
-    result.elements[0][1] = axis.y * axis.x * cos_value + axis.z * sin_theta;
-    result.elements[0][2] = axis.z * axis.x * cos_value - axis.y * sin_theta;
+    result.elements[0][1] = axis.y * axis.x * cos_value - axis.z * sin_theta;
+    result.elements[0][2] = axis.z * axis.x * cos_value + axis.y * sin_theta;
 
-    result.elements[1][0] = axis.x * axis.y * cos_value - axis.z * cos_theta;
+    result.elements[1][0] = axis.x * axis.y * cos_value + axis.z * sin_theta;
     result.elements[1][1] = axis.y * axis.y * cos_value + cos_theta;
-    result.elements[1][2] = axis.z * axis.y * cos_value + axis.x * sin_theta;
+    result.elements[1][2] = axis.z * axis.y * cos_value - axis.x * sin_theta;
 
-    result.elements[2][0] = axis.x * axis.z * cos_value + axis.y * sin_theta;
-    result.elements[2][1] = axis.y * axis.z * cos_value - axis.x * sin_theta;
+    result.elements[2][0] = axis.x * axis.z * cos_value - axis.y * sin_theta;
+    result.elements[2][1] = axis.y * axis.z * cos_value + axis.x * sin_theta;
     result.elements[2][2] = axis.z * axis.z * cos_value + cos_theta;
 
     return result;
@@ -160,6 +166,17 @@ m4_scale_m3(v3 scale) {
     result.elements[0][0] = scale.x;
     result.elements[1][1] = scale.y;
     result.elements[2][2] = scale.z;
+    return result;
+}
+
+internal m4
+m4_transposed(m4 m) {
+    m4 result = m4_init_diagonal(1.0f);
+    for (i32 i = 0; i < 4; i++) {
+        for (i32 j = 0; j < 4; j++) {
+            result.elements[i][j] = m.elements[j][i];
+        }
+    }
     return result;
 }
 

@@ -53,12 +53,18 @@ typedef struct Object {
     v3 translation;
 } Object;
 
-void render_object(Image *image, Object *object) {
+typedef struct Camera {
+    v3 position;
+    v3 rotation_axis;
+    f32 angle_degrees;
+} Camera;
+
+void render_object(Image *image, Object *object, m4 camera_transform) {
     Model *model = object->model;
     v3 scale = object->scale;
     v3 rotation_axis = object->rotation_axis;
     f32 angle_degrees = object->angle_degrees;
-    f32 angle_radians = angle_degrees * 180 / MY_PI;
+    f32 angle_radians = angle_degrees * MY_PI / 180.0f;
     v3 translation = object->translation;
 
     Point *projected_vertices = malloc(sizeof(projected_vertices) * model->vertices_count);
@@ -70,6 +76,9 @@ void render_object(Image *image, Object *object) {
         transform = m4_multiply_m4(transform, m4_scale_m3(scale));
         transform = m4_multiply_m4(transform, m4_rotate(rotation_axis, angle_radians));
         transform = m4_multiply_m4(transform, m4_translate_v3(translation));
+
+        transform = m4_multiply_m4(transform, camera_transform);
+
         v4 transformed_vertex = v4_multiply_m4(vertex_h, transform);
         projected_vertices[vertex_index] = project_vertex_to_pixel(transformed_vertex);
     }
@@ -88,10 +97,7 @@ void render_object(Image *image, Object *object) {
     free(projected_vertices);
 }
 
-INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow) {
-    Image *image = &global_image;
-    image->pixels = (u8 *)calloc(image->width * image->height * image->channel_number, sizeof(image->pixels));
-
+void clear_screen(Image *image) {
     for (i32 y = 0; y < image->height; ++y) {
         for (i32 x = 0; x < image->width; ++x) {
             for (i32 channel = 0; channel < image->channel_number; ++channel) {
@@ -99,14 +105,25 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             }
         }
     }
+}
 
-    // image_draw_triangle_filled_shaded(image, 100, 100, 400, 250, 250, 400, color_orange, 0.0f, 0.7f, 1.0f);
-    // image_draw_triangle_wireframe(image, 100, 100, 400, 250, 250, 400, color_light_yellow);
+void render_scene(Image *image, Camera camera, Object *objects, i32 objects_count) {
+    f32 camera_angle_radians = camera.angle_degrees * MY_PI / 180.0f;
+    m4 camera_matrix = m4_init_diagonal(1.0f);
+    camera_matrix = m4_multiply_m4(camera_matrix, m4_translate_v3(v3_multiply_scalar(camera.position, -1)));
+    camera_matrix = m4_multiply_m4(camera_matrix, m4_transposed(m4_rotate(camera.rotation_axis, camera_angle_radians)));
 
-    // image_draw_triangle_filled_shaded(image, 20, 20, 100, 50, 20, 400, color_purple, 1.0f, 0.2f, 0.6f);
-    // image_draw_triangle_wireframe(image, 20, 20, 100, 50, 20, 400, color_white);
+    for (i32 i = 0; i < objects_count; i++) {
+        Object object = objects[i];
+        render_object(image, &object, camera_matrix);
+    }
+}
+
+INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow) {
+    Image *image = &global_image;
+    image->pixels = (u8 *)calloc(image->width * image->height * image->channel_number, sizeof(image->pixels));
+
     Model model;
-
     v3 vertices[] = {
         {1, 1, 1},
         {-1, 1, 1},
@@ -143,17 +160,25 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     // cube.translation = v3(-1.5f, 1.0f, 7.0f);
 
     // render_object(image, &cube);
+    v3 rotation_axis = v3(0.0f, 0.0f, 1.0f);
+    m4 camera_matrix = m4_rotate(rotation_axis, 0);
 
     Object _cube;
     _cube.model = &model;
     _cube.scale = v3(1.0f, 1.0f, 1.0f);
     _cube.rotation_axis = v3(0.0f, 1.0f, 0.0f);
-    _cube.angle_degrees = 30;
-    _cube.translation = v3(1.0f, 0.0f, 7.0f);
+    _cube.angle_degrees = 45;
+    _cube.translation = v3(0.0f, 0.0f, 4.0f);
 
-    render_object(image, &_cube);
+    Camera camera;
+    camera.position = v3(0.0f, 0.0f, 0.0f);
+    camera.rotation_axis = v3(0.0f, 0.0f, 1.0f);
+    camera.angle_degrees = 20;
 
+    clear_screen(image);
+    render_scene(image, camera, &_cube, 1);
     image_save(image, "../render.png");
+
     free(image->pixels);
     return 0;
 }
