@@ -11,5 +11,5 @@ set PLATFORM_LINKER_FLAGAS= gdi32.lib user32.lib winmm.lib %COMMON_LINKER_FLAGS%
 
 if not exist build mkdir build
 pushd build
-cl %BUILD_OPTIONS% %COMPILE_FLAGS% ../source/win32/win32_main.c /link %PLATFORM_LINKER_FLAGAS% /out:%APP_NAME%.exe
+cl %BUILD_OPTIONS% %COMPILE_FLAGS% ../source/win32/win32_main.cpp /link %PLATFORM_LINKER_FLAGAS% /out:%APP_NAME%.exe
 popd
