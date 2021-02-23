@@ -1,16 +1,5 @@
 #include "color.h"
 
-typedef struct Vertex {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vertex;
-
-typedef struct Point {
-    f32 x;
-    f32 y;
-} Point;
-
 typedef struct Image {
     const i32 width;
     const i32 height;
